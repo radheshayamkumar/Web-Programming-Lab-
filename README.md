@@ -155,3 +155,158 @@ console.log("Factorial of 5 is:", getFactorial(5));
 * **`px` (Pixels)**: Stays the same size regardless of the screen size.
 * **`%` (Percentage)**: Changes based on the width of the parent container.
 * **`rem/em`**: Changes based on the font size of the root or parent element.
+
+Here are the solutions for the remaining lab questions involving XML, JavaScript DOM parsing, and Java Server Pages (JSP).
+
+---
+
+## 7. XML Parsing with JavaScript
+**Objective:** Create an XML structure and use JavaScript to extract and display its data on a web page.
+
+### Code (`books.html`)
+```html
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Book List</h2>
+    <div id="display"></div>
+
+    <script>
+        // XML String
+        const xmlString = `
+        <library>
+            <book>
+                <title>Java Programming</title>
+                <author>Herbert Schildt</author>
+                <price>500</price>
+            </book>
+            <book>
+                <title>Web Technologies</title>
+                <author>Jeffrey Jackson</author>
+                <price>450</price>
+            </book>
+        </library>`;
+
+        // Parsing XML
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+        const books = xmlDoc.getElementsByTagName("book");
+        
+        let output = "<ul>";
+        for (let i = 0; i < books.length; i++) {
+            let title = books[i].getElementsByTagName("title")[0].childNodes[0].nodeValue;
+            let author = books[i].getElementsByTagName("author")[0].childNodes[0].nodeValue;
+            output += `<li><strong>${title}</strong> by ${author}</li>`;
+        }
+        output += "</ul>";
+        document.getElementById("display").innerHTML = output;
+    </script>
+</body>
+</html>
+```
+
+### Explanation
+* **XML Structure**: A hierarchical format used to store data. Here, `<library>` is the root, and `<book>` is the child.
+* **DOMParser**: A JavaScript object that converts a string containing XML into a "DOM Document" that we can navigate.
+* **getElementsByTagName**: Used to grab all elements with a specific tag name, similar to how we select HTML elements.
+
+---
+
+## 8. JSP Greeting Program
+**Objective:** Use JSP to take user input from a form and display a personalized message.
+
+### Code (`index.jsp` & `greet.jsp`)
+**index.jsp (The Form)**
+```html
+<form action="greet.jsp">
+    Enter Name: <input type="text" name="username">
+    <input type="submit" value="Greet Me">
+</form>
+```
+
+**greet.jsp (The Logic)**
+```jsp
+<html>
+<body>
+    <% 
+        String name = request.getParameter("username");
+        out.print("<h1>Hello, " + name + "! Welcome to JSP.</h1>");
+    %>
+</body>
+</html>
+```
+
+### Explanation
+* **`request.getParameter()`**: This method retrieves the data sent from the HTML form.
+* **`<% ... %>`**: These are JSP scriptlet tags. Any Java code written inside them is executed on the server.
+* **Processing**: When the user clicks submit, the name is sent to `greet.jsp`, which processes it and sends back the HTML greeting.
+
+---
+
+## 9. JSP Visit Counter (Session Tracking)
+**Objective:** Count how many times a user has visited the page during their current session.
+
+### Code (`counter.jsp`)
+```jsp
+<%@ page import="java.util.*" %>
+<html>
+<body>
+    <%
+        Integer count = (Integer) session.getAttribute("visitCount");
+        if (count == null) {
+            count = 1;
+        } else {
+            count++;
+        }
+        session.setAttribute("visitCount", count);
+    %>
+    <h2>You have visited this page <%= count %> time(s) in this session.</h2>
+</body>
+</html>
+```
+
+### Explanation
+* **Session**: A session tracks a specific user’s interaction with the website across multiple page refreshes.
+* **`session.getAttribute()`**: Checks if a "visitCount" variable already exists for this user.
+* **`session.setAttribute()`**: Saves the updated number back into the session memory.
+
+---
+
+## 10. JSP Database Connectivity (User Records)
+**Objective:** Connect to a MySQL database and display a table of users.
+
+### Code (`displayUsers.jsp`)
+```jsp
+<%@ page import="java.sql.*" %>
+<html>
+<body>
+    <table border="1">
+        <tr><th>ID</th><th>Name</th><th>Email</th></tr>
+        <%
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydb", "root", "password");
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery("select * from users");
+
+                while(rs.next()) {
+        %>
+                <tr>
+                    <td><%= rs.getInt("id") %></td>
+                    <td><%= rs.getString("name") %></td>
+                    <td><%= rs.getString("email") %></td>
+                </tr>
+        <%
+                }
+                con.close();
+            } catch(Exception e) { out.print(e); }
+        %>
+    </table>
+</body>
+</html>
+```
+
+### Explanation
+* **JDBC**: Java Database Connectivity. It requires a driver (the `Class.forName` line) to talk to the database.
+* **Connection & Statement**: Establish the link and prepare the SQL command (`select * from users`).
+* **ResultSet**: An object that holds the data returned from the database. We loop through it using `rs.next()` to build the table rows.
